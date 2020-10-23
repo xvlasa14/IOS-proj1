@@ -1,0 +1,484 @@
+#!/bin/sh
+# ------------------------------
+#           IOS PROJ1           
+#       author: xvlasa14
+#         date: 20. 3. 2020
+# ------------------------------
+
+
+export POSIXLY_CORRECT=yes
+    givenPath="."
+    normFlag=0                  # normalization flag set to 0
+    ignoreFlag=0                # ignore flag set to 0
+    MAXLINE=0
+
+if [ $# -eq 0 ] ; then          # script is run only by itself
+    noFiles=$(find "$givenPath" -type f | wc -l)           # count all normal non-directory files
+    noDirs=$(find "$givenPath" -type d | wc -l)            # count all directories and subdirectories
+   
+    # COUNTING FILES ACCORDING TO SIZES
+    hunB=$(find "$givenPath" -type f -size -100c | wc -l)  
+        huns=$((0+hunB)) 
+    kiB=$(find "$givenPath" -type f -size -1024c | wc -l)
+        kibs=$((kiB-hunB))
+    tenKiB=$(find "$givenPath" -type f -size -10240c | wc -l)
+        tenkibs=$((tenKiB-kiB))
+    hunKiB=$(find "$givenPath" -type f -size -102400c | wc -l)
+        hunks=$((hunKiB-tenKiB))
+    miB=$(find "$givenPath" -type f -size -1048576c | wc -l)
+        mibs=$((miB-hunKiB))
+    tenMiB=$(find "$givenPath" -type f -size -10485760c | wc -l)
+        tenmibs=$((tenMiB-miB))
+    hunMiB=$(find "$givenPath" -type f -size -104857600c | wc -l)
+        hums=$((hunMiB-tenMiB))
+    giB=$(find "$givenPath" -type f -size -1073741824c | wc -l)
+        gibs=$((giB-hunMiB))
+    more=$(find "$givenPath" -type f -size +1073741823c | wc -l)
+        mores=$((0+more)) 
+    # PRINTING REPORT
+    thisDir=$(pwd)
+    echo "Root directory: "$thisDir
+    echo "Directories:"$noDirs
+    echo "All files:"$noFiles
+    echo "File size histogram:"
+    printf "  <100 B  : "
+    perl -E 'say "#" x '$huns''
+    printf "  <1 KiB  : "
+    perl -E 'say "#" x '$kibs''
+    printf "  <10 KiB : "
+    perl -E 'say "#" x '$tenkibs''
+    printf "  <100 KiB: "
+    perl -E 'say "#" x '$hunks''
+    printf "  <1 MiB  : "
+    perl -E 'say "#" x '$mibs''
+    printf "  <10 MiB : "
+    perl -E 'say "#" x '$tenmibs''
+    printf "  <100 MiB: "
+    perl -E 'say "#" x '$hums''
+    printf "  <1 GiB  : "
+    perl -E 'say "#" x '$gibs''
+    printf "  >=1 GiB : "
+    perl -E 'say "#" x '$mores''
+    printf "\n"
+
+    exit 0
+
+else                                            # there is some other stuff 
+    while getopts ":n:i:" arguments; do      # going through the arguments 
+        case "$arguments" in                       
+            n)
+                normFlag=1                  # normalization flag   
+                path=${OPTARG}
+                originalPath=${OPTARG}
+                if [ "$path" != "" ] ; then
+                    if echo "$path" | egrep -q '^/'; then          # if arg 1 starts with /, expecting a path
+                    path=$( echo "$path" | cut -c2-)    # crop, because starting path with / is stupid
+                    fi
+                    givenPath=$path
+                    if [ ! -d $givenPath ] ; then
+                        echo "This is not a directory"
+                        exit 1
+                    fi
+                    thisDir=$originalPath
+                else
+                    givenPath="."
+                    thisDir=$(pwd)
+                fi
+                ;;
+
+            i)                                
+                ignoreFlag=1
+                ignore=${OPTARG}            # ignore flag
+                if echo "$ignore" | egrep -q '^/'; then
+                    ignore=$( echo "$ignore" | cut -c2-)
+                    snipped=$ignore                        
+                fi
+                    snipped=$ignore
+
+                if [ "$iArg" == "-n" ] ; then
+                    echo "You messed up -i argument ;)"
+                    exit 1
+                fi                                
+                ;;
+
+            *)
+                if [ $# -eq 1  ] || [ $# -eq 3 ] ; then
+                    normFlag=1
+                    givenPath="."
+                    thisDir=$(pwd)
+                else
+                    echo "Something went wrong :)"
+                    exit 1
+                fi
+            ;;
+        esac    
+    done
+fi
+
+if [ $normFlag -eq 0 ] && [ $ignoreFlag -eq 0 ] ; then      # both flags are zero, there is something else
+    if echo "$1" | egrep -q '^/'; then  
+        if [ $# -eq 1 ] ; then                
+            givenPath=$( echo "$1" | cut -c2-)
+            originalPath=$1
+
+        fi
+    else
+        givenPath=$1
+        originalPath=$1
+    fi
+
+    if [ -d "$givenPath" ] ; then
+        noFiles=$(find "$givenPath" -type f | wc -l)           # count all normal non-directory files
+        noDirs=$(find "$givenPath" -type d | wc -l)            # count all directories and subdirectories
+    
+# COUNTING FILES ACCORDING TO SIZES
+    hunB=$(find "$givenPath" -type f -size -100c | wc -l)  
+        huns=$((0+hunB)) 
+    kiB=$(find "$givenPath" -type f -size -1024c | wc -l)
+        kibs=$((kiB-hunB))
+    tenKiB=$(find "$givenPath" -type f -size -10240c | wc -l)
+        tenkibs=$((tenKiB-kiB))
+    hunKiB=$(find "$givenPath" -type f -size -102400c | wc -l)
+        hunks=$((hunKiB-tenKiB))
+    miB=$(find "$givenPath" -type f -size -1048576c | wc -l)
+        mibs=$((miB-hunKiB))
+    tenMiB=$(find "$givenPath" -type f -size -10485760c | wc -l)
+        tenmibs=$((tenMiB-miB))
+    hunMiB=$(find "$givenPath" -type f -size -104857600c | wc -l)
+        hums=$((hunMiB-tenMiB))
+    giB=$(find "$givenPath" -type f -size -1073741824c | wc -l)
+        gibs=$((giB-hunMiB))
+    more=$(find "$givenPath" -type f -size +1073741823c | wc -l)
+        mores=$((0+more)) 
+        # PRINTING REPORT
+        echo "Root directory: "$originalPath
+        echo "Directories:"$noDirs
+        echo "All files:"$noFiles
+        echo "File size histogram:"
+        printf "  <100 B  : "
+        perl -E 'say "#" x '$huns''
+        printf "  <1 KiB  : "
+        perl -E 'say "#" x '$kibs''
+        printf "  <10 KiB : "
+        perl -E 'say "#" x '$tenkibs''
+        printf "  <100 KiB: "
+        perl -E 'say "#" x '$hunks''
+        printf "  <1 MiB  : "
+        perl -E 'say "#" x '$mibs''
+        printf "  <10 MiB : "
+        perl -E 'say "#" x '$tenmibs''
+        printf "  <100 MiB: "
+        perl -E 'say "#" x '$hums''
+        printf "  <1 GiB  : "
+        perl -E 'say "#" x '$gibs''
+        printf "  >=1 GiB : "
+        perl -E 'say "#" x '$mores''
+        printf "\n"
+
+        exit 0
+    else
+        echo "Something is wrong with your input"
+        exit 1
+    fi
+
+elif [ $normFlag -eq 1 ] && [ $ignoreFlag -eq 1 ] ; then    # normalization and ignore
+
+    noFiles=$(find $givenPath -type f -not -path "*$snipped*" | wc -l)           # count all normal non-directory files without ignored
+    noDirs=$(find $givenPath -type d -not -path "*$snipped*" | wc -l)          # count all directories and subdirectories without ignored
+   
+    # COUNTING FILES ACCORDING TO SIZES
+    if [ -t 0 ] ; then      # if run from terminal 
+        if [ -t 1 ] ; then  # and output to terminal
+            windowSize=$(tput cols)
+            windowSize=$((windowSize-13))
+        else
+            windowSize=67   # output into a file
+        fi
+    else
+        if [ -t 1 ] ; then  # and output to terminal
+            windowSize=$(tput cols)
+            windowSize=$((windowSize-13))
+        else
+            windowSize=67   # output into a file
+        fi
+    fi
+
+    hunB=$(find "$givenPath" -type f -not -path "*$snipped*" -size -100c | wc -l)  
+    huns=$((0+hunB)) 
+    if [ $MAXLINE -le $huns ] ; then
+        MAXLINE=$huns
+    fi  
+
+    kiB=$(find "$givenPath" -type f -not -path "*$snipped*" -size -1024c | wc -l)
+    kibs=$((kiB-hunB))
+    if [ $MAXLINE -le $kibs ] ; then
+        MAXLINE=$kibs
+    fi  
+
+    tenKiB=$(find "$givenPath" -type f -not -path "*$snipped*" -size -10240c | wc -l)
+    tenkibs=$((tenKiB-kiB))
+    if [ $MAXLINE -le $tenkibs ] ; then
+        MAXLINE=$tenkibs
+    fi  
+
+    hunKiB=$(find "$givenPath" -type f -not -path "*$snipped*" -size -102400c | wc -l)
+    hunks=$((hunKiB-tenKiB))
+    if [ $MAXLINE -le $hunks ] ; then
+        MAXLINE=$hunks
+    fi  
+
+    miB=$(find "$givenPath" -type f -not -path "*$snipped*" -size -1048576c | wc -l)
+    mibs=$((miB-hunKiB))
+    if [ $MAXLINE -le $mibs ] ; then
+        MAXLINE=$mibs
+    fi  
+
+    tenMiB=$(find "$givenPath" -type f -not -path "*$snipped*" -size -10485760c | wc -l)
+    tenmibs=$((tenMiB-miB))
+    if [ $MAXLINE -le $tenmibs ] ; then
+        MAXLINE=$tenmibs
+    fi  
+
+    hunMiB=$(find "$givenPath" -type f -not -path "*$snipped*" -size -104857600c | wc -l)
+    hums=$((hunMiB-tenMiB))
+    if [ $MAXLINE -le $hums ] ; then
+        MAXLINE=$hums
+    fi  
+
+    giB=$(find "$givenPath" -type f -not -path "*$snipped*" -size -1073741824c | wc -l)
+    gibs=$((giB-hunMiB))
+    if [ $MAXLINE -le $gibs ] ; then
+        MAXLINE=$gibs
+    fi  
+
+    more=$(find "$givenPath" -type f -not -path "*$snipped*" -size +1073741823c | wc -l)
+    mores=$((0+more)) 
+    if [ $MAXLINE -le $mores ] ; then
+        MAXLINE=$mores
+    fi  
+
+    finalSize=$((MAXLINE / windowSize))
+    finalSize=$((finalSize+1))
+
+    # new lenghts
+    huns=$((huns / finalSize ))
+    kibs=$((kibs / finalSize ))
+    tenkibs=$((tenkibs / finalSize ))
+    hunks=$((hunks / finalSize ))
+    mibs=$((mibs / finalSize ))
+    tenmibs=$((tenmibs / finalSize ))
+    hums=$((hums / finalSize ))
+    gibs=$((gibs / finalSize ))
+    mores=$((mores / finalSize ))
+
+    
+    # PRINTING REPORT
+    echo "Root directory: "$thisDir
+    echo "Directories:"$noDirs
+    echo "All files:"$noFiles
+    echo "File size histogram:"
+    printf "  <100 B  : "
+    perl -E 'say "#" x '$huns''
+    printf "  <1 KiB  : "
+    perl -E 'say "#" x '$kibs''
+    printf "  <10 KiB : "
+    perl -E 'say "#" x '$tenkibs''
+    printf "  <100 KiB: "
+    perl -E 'say "#" x '$hunks''
+    printf "  <1 MiB  : "
+    perl -E 'say "#" x '$mibs''
+    printf "  <10 MiB : "
+    perl -E 'say "#" x '$tenmibs''
+    printf "  <100 MiB: "
+    perl -E 'say "#" x '$hums''
+    printf "  <1 GiB  : "
+    perl -E 'say "#" x '$gibs''
+    printf "  >=1 GiB : "
+    perl -E 'say "#" x '$mores''
+    printf "\n"
+    exit 0
+
+elif [ $normFlag -eq 0 ] && [ $ignoreFlag -eq 1 ] ; then    # only ignore flag
+    thisDir=$(pwd)
+    if [ $# -eq 3 ] ; then
+        givenPath=$3
+        if echo "$givenPath" | egrep -q '^/'; then          # if arg 1 starts with /, expecting a path
+            thisDir=$givenPath
+            givenPath=$( echo "$givenPath" | cut -c2-)    # crop, because starting path with / is stupid
+        else
+            thisDir=$givenPath
+        fi
+
+    fi
+    notIgnored=$(find $givenPath -type f -not -path "*$snipped*" | wc -l)
+
+    noFiles=$(find $givenPath -type f -not -path "*$snipped*" | wc -l)           # count all normal non-directory files
+    noDirs=$(find $givenPath -type d -not -path "*$snipped*" | wc -l)          # count all directories and subdirectories
+   
+    # COUNTING FILES ACCORDING TO SIZES
+    hunB=$(find "$givenPath" -type f -not -path "*$snipped*" -size -100c | wc -l)  
+        huns=$((0+hunB)) 
+    kiB=$(find "$givenPath" -type f -not -path "*$snipped*" -size -1024c | wc -l)
+        kibs=$((kiB-hunB))
+    tenKiB=$(find "$givenPath" -type f -not -path "*$snipped*" -size -10240c | wc -l)
+        tenkibs=$((tenKiB-kiB))
+    hunKiB=$(find "$givenPath" -type f -not -path "*$snipped*" -size -102400c | wc -l)
+        hunks=$((hunKiB-tenKiB))
+    miB=$(find "$givenPath" -type f -not -path "*$snipped*" -size -1048576c | wc -l)
+        mibs=$((miB-hunKiB))
+    tenMiB=$(find "$givenPath" -type f -not -path "*$snipped*" -size -10485760c | wc -l)
+        tenmibs=$((tenMiB-miB))
+    hunMiB=$(find "$givenPath" -type f -not -path "*$snipped*" -size -104857600c | wc -l)
+        hums=$((hunMiB-tenMiB))
+    giB=$(find "$givenPath" -type f -not -path "*$snipped*" -size -1073741824c | wc -l)
+        gibs=$((giB-hunMiB))
+    more=$(find "$givenPath" -type f -not -path "*$snipped*" -size +1073741823c | wc -l)
+        mores=$((0+more)) 
+    # PRINTING REPORT
+    echo "Root directory: "$thisDir
+    echo "Directories:"$noDirs
+    echo "All files:"$noFiles
+    echo "File size histogram:"
+    printf "  <100 B  : "
+    perl -E 'say "#" x '$huns''
+    printf "  <1 KiB  : "
+    perl -E 'say "#" x '$kibs''
+    printf "  <10 KiB : "
+    perl -E 'say "#" x '$tenkibs''
+    printf "  <100 KiB: "
+    perl -E 'say "#" x '$hunks''
+    printf "  <1 MiB  : "
+    perl -E 'say "#" x '$mibs''
+    printf "  <10 MiB : "
+    perl -E 'say "#" x '$tenmibs''
+    printf "  <100 MiB: "
+    perl -E 'say "#" x '$hums''
+    printf "  <1 GiB  : "
+    perl -E 'say "#" x '$gibs''
+    printf "  >=1 GiB : "
+    perl -E 'say "#" x '$mores''
+    printf "\n"
+
+    exit 0
+
+elif [ $normFlag -eq 1 ] && [ $ignoreFlag -eq 0 ] ; then    # only normalization flag
+    noFiles=$(find "$givenPath" -type f | wc -l)    # count all normal non-directory files
+    files=$(find "$givenPath" -type f)
+    noDirs=$(find "$givenPath" -type d | wc -l)     # count all directories
+
+    # COUNTING FILES ACCORDING TO SIZE
+    if [ -t 0 ] ; then      # if run from terminal 
+        if [ -t 1 ] ; then  # and output to terminal
+            windowSize=$(tput cols)
+            windowSize=$((windowSize-13))
+        else
+            windowSize=67   # output into a file
+        fi
+    else
+        if [ -t 1 ] ; then  # and output to terminal
+            windowSize=$(tput cols)
+            windowSize=$((windowSize-13))
+        else
+            windowSize=67   # output into a file
+        fi
+    fi
+
+    hunB=$(find "$givenPath" -type f -size -100c | wc -l)  
+    huns=$((0+hunB)) 
+    if [ $MAXLINE -le $huns ] ; then
+        MAXLINE=$huns
+    fi  
+
+    kiB=$(find "$givenPath" -type f -size -1024c | wc -l)
+    kibs=$((kiB-hunB))
+    if [ $MAXLINE -le $kibs ] ; then
+        MAXLINE=$kibs
+    fi  
+
+    tenKiB=$(find "$givenPath" -type f -size -10240c | wc -l)
+    tenkibs=$((tenKiB-kiB))
+    if [ $MAXLINE -le $tenkibs ] ; then
+        MAXLINE=$tenkibs
+    fi  
+
+    hunKiB=$(find "$givenPath" -type f -size -102400c | wc -l)
+    hunks=$((hunKiB-tenKiB))
+    if [ $MAXLINE -le $hunks ] ; then
+        MAXLINE=$hunks
+    fi  
+
+    miB=$(find "$givenPath" -type f -size -1048576c | wc -l)
+    mibs=$((miB-hunKiB))
+    if [ $MAXLINE -le $mibs ] ; then
+        MAXLINE=$mibs
+    fi  
+
+    tenMiB=$(find "$givenPath" -type f -size -10485760c | wc -l)
+    tenmibs=$((tenMiB-miB))
+    if [ $MAXLINE -le $tenmibs ] ; then
+        MAXLINE=$tenmibs
+    fi  
+
+    hunMiB=$(find "$givenPath" -type f -size -104857600c | wc -l)
+    hums=$((hunMiB-tenMiB))
+    if [ $MAXLINE -le $hums ] ; then
+        MAXLINE=$hums
+    fi  
+
+    giB=$(find "$givenPath" -type f -size -1073741824c | wc -l)
+    gibs=$((giB-hunMiB))
+    if [ $MAXLINE -le $gibs ] ; then
+        MAXLINE=$gibs
+    fi  
+
+    more=$(find "$givenPath" -type f -size +1073741823c | wc -l)
+    mores=$((0+more)) 
+    if [ $MAXLINE -le $mores ] ; then
+        MAXLINE=$mores
+    fi  
+
+    finalSize=$((MAXLINE / windowSize))
+    finalSize=$((finalSize+1))
+
+    # new lenghts
+    huns=$((huns / finalSize ))
+    kibs=$((kibs / finalSize ))
+    tenkibs=$((tenkibs / finalSize ))
+    hunks=$((hunks / finalSize ))
+    mibs=$((mibs / finalSize ))
+    tenmibs=$((tenmibs / finalSize ))
+    hums=$((hums / finalSize ))
+    gibs=$((gibs / finalSize ))
+    mores=$((mores / finalSize ))
+
+    # PRINTING REPORT
+    thisDir=$(pwd)
+    echo "Root directory: "$thisDir
+    echo "Directories:"$noDirs
+    echo "All files:"$noFiles
+    echo "File size histogram:"
+    printf "  <100 B  : "
+    perl -E 'say "#" x '$huns''
+    printf "  <1 KiB  : "
+    perl -E 'say "#" x '$kibs''
+    printf "  <10 KiB : "
+    perl -E 'say "#" x '$tenkibs''
+    printf "  <100 KiB: "
+    perl -E 'say "#" x '$hunks''
+    printf "  <1 MiB  : "
+    perl -E 'say "#" x '$mibs''
+    printf "  <10 MiB : "
+    perl -E 'say "#" x '$tenmibs''
+    printf "  <100 MiB: "
+    perl -E 'say "#" x '$hums''
+    printf "  <1 GiB  : "
+    perl -E 'say "#" x '$gibs''
+    printf "  >=1 GiB : "
+    perl -E 'say "#" x '$mores''
+    printf "\n"
+    exit 0
+fi
+
+
+    # jen dir: počet arg je 1
+
